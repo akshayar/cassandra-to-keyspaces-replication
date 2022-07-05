@@ -5,8 +5,5 @@
 4. Run following commands to install DataStax agent and restart Cassandra service - 
 ```shell
 cd ${AWS_DEPLOYMENT_HOME}
-export CASSANDRA_INI_FILE=<path to init file>
-export CASSANDRA_KEY_FILE=<path-key-file>
-chmod 400 ${CASSANDRA_KEY_FILE}
-ansible-playbook   --user='ubuntu'   --inventory=${CASSANDRA_INI_FILE} --extra-vars='{"ansible_ssh_private_key_file":"'${CASSANDRA_KEY_FILE}'","pulsar_service_url":"'${PULSAR_SERVICE_VALUE}'"}'  ../cassandra-cluster-update-cdc-agent.yaml
+ansible-playbook   --user='ubuntu'   --inventory=cassandra.ini --extra-vars='{"ansible_ssh_private_key_file":"'${CASSANDRA_KEY_FILE}'","pulsar_service_url":"'${PULSAR_SERVICE_VALUE}'"}'  ../cassandra-cluster-update-cdc-agent.yaml
 ```

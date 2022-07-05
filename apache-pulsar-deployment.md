@@ -26,26 +26,25 @@ aws ec2 describe-vpcs  --vpc-ids ${VPC_ID} --query Vpcs[0].CidrBlock --output te
 aws ec2 describe-subnets --filters "Name=vpc-id,Values=${VPC_ID}" --query Subnets[].[VpcId,AvailabilityZone,CidrBlock,SubnetId,AvailableIpAddressCount,Tags[].Value] --output text 
 ```
 
-5. Create Pulsar nodes in the private subnet of the VPC of Cassandra cluster. Edit terraform.tfvars file and update region,VpcID, availability_zone , subnet_id and base_cidr_block.
+5. You needd to create Pulsar nodes in the private subnet of the VPC of Cassandra cluster. Edit terraform.tfvars file and update region,VpcID, availability_zone , subnet_id and base_cidr_block.
 6. Execute following command to create EC2 instnaces required to host Apache Pulsar. The deployment steps will promopt-"Do you want to perform these actions?". Enter yes.
 ```shell
 cd ${AWS_DEPLOYMENT_HOME}
 terraform init
 terraform apply
 ```
-7. Set environment variables and use those to create the config file which will be used further. 
+7. Set environment variables which will be used to connect to Pulsar cluster in following commands. 
 
 ```
-PULSAR_SERVICE_VALUE=`cat terraform.tfstate | jq -r .outputs.pulsar_service_url.value` 
+export PULSAR_SERVICE_VALUE=`cat terraform.tfstate | jq -r .outputs.pulsar_service_url.value` 
 echo $PULSAR_SERVICE_VALUE 
-PULSAR_ADMIN_URL=`cat terraform.tfstate | jq -r .outputs.pulsar_web_url.value` 
+export PULSAR_ADMIN_URL=`cat terraform.tfstate | jq -r .outputs.pulsar_web_url.value` 
 echo $PULSAR_ADMIN_URL
 ```
 
-
-
 8. Run the ansible playbook to deploy Apache Pulsar on EC2 instances created above.
 ```shell
+cd ${AWS_DEPLOYMENT_HOME}
 TF_STATE=./ TF_KEY_NAME=private_ip ansible-playbook   --user='ec2-user'   --inventory=~/environment/terraform-inventory  ../pulsar-cluster-deploy.yaml
 ```
 9. Validate Apache Pulsar cluster  installation. The steps above will install Apache Pulsar libraries on Cloud9 node at ~/environment/pulsar-client. Validate cluster deployment by sending and consuming messages. 

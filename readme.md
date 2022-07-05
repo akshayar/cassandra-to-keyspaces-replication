@@ -61,65 +61,50 @@ git clone https://github.com/akshayar/cassandra-to-keyspaces-replication.git
 cd  cassandra-to-keyspaces-replication 
 export SOURCE_CODE_ROOT=`pwd`
 ## For multi node pulsar cluster go to pulsar-cluster/terraform-ansible-mnode/aws 
-cd terraform-ansible-mnode/aws
-cp -r ${SOURCE_CODE_ROOT}/cassandra-templates ../
-cp -r ${SOURCE_CODE_ROOT}/parameters ../
-cp -r ${SOURCE_CODE_ROOT}/cdc-connector ../templates/
 ## For single node/standalone pulsar go to 
 ## cd terraform-ansible-standalone/aws
-
+cd terraform-ansible-mnode/aws
 export AWS_DEPLOYMENT_HOME=`pwd`
-export REGION="us-east-1"
-export SOURCE_KEYSPACE="pocdb1"
-export SOURCE_TABLE_NAME="customers"
-export CASSANDRA_SEED_SERVERS=<cassandra-seed-servers comma separated>
-envsubst < ../parameters/cassandra-config-template.json > ../parameters/cassandra-config.json
+. ${SOURCE_CODE_ROOT}/setup-repository.sh
+
 ```
+7. Update `${SOURCE_CODE_ROOT}/setup-environment.sh` and `${SOURCE_CODE_ROOT}/parameters/cassandra-config-template.json`. Run below command to set environment variables. 
+```
+. ${SOURCE_CODE_ROOT}/setup-environment.sh
+```
+8. Update `${AWS_DEPLOYMENT_HOME}/cassandra.ini` and add all Cassandra servers in the cassandra.ini file. 
 
-
-7. Enable CDC by modifying <CASSANDRA_ROOT>/conf/cassandra.yaml (/usr/share/oss/conf/cassandra.yaml for deployment in Step 1) and adding/updating following properties.
+9. Enable CDC by modifying <CASSANDRA_ROOT>/conf/cassandra.yaml (/usr/share/oss/conf/cassandra.yaml for deployment in Step 1) and adding/updating following properties.
 ```shell
 cdc_enabled: false
 cdc_total_space_in_mb: 4096
 cdc_free_space_check_interval_ms: 250
 cdc_raw_directory: /var/lib/cassandra/cdc_raw
 ```
-8. Run following ansible commands to enable CDC and copy [schema.cql](./cassandra-templates/schema.cql).
-
-```
-export CASSANDRA_KEY_FILE=<path-key-file>
-```
-
-```
-cat << EOF > ${AWS_DEPLOYMENT_HOME}/cassandra.ini
-[cassandra]
-<cassandra-private-ip1>
-<cassandra-private-ip2>
-<cassandra-private-ip3>
-EOF
-```
+10. Run following ansible commands to enable CDC and copy [schema.cql](./cassandra-templates/schema.cql).
 
 ```shell
 cd ${AWS_DEPLOYMENT_HOME}
-chmod 400 ${CASSANDRA_KEY_FILE}
-export CASSANDRA_CONFIG_FILE_PATH="/usr/share/oss/conf/cassandra.yaml"
 ansible-playbook   --user='ubuntu'   --inventory=cassandra.ini --extra-vars='{"ansible_ssh_private_key_file":"'${CASSANDRA_KEY_FILE}'", "cassandra_config_file_path":"'${CASSANDRA_CONFIG_FILE_PATH}'"}'  ../cassandra-cluster-enable-cdc.yaml
 ```
-9. Execute following command to create required schema from [schema.cql](./cassandra-templates/schema.cql). 
+11. Execute following command to create required keyspace and table from [schema.cql](./cassandra-templates/schema.cql). 
 
 ```
-ssh -i ${CASSANDRA_KEY_FILE} ubuntu@<seed-address> 
+CASSANDRA_SEED_SERVER_1=`echo ${CASSANDRA_SEED_SERVERS} | cut -f1 -d","`
+ssh -i ${CASSANDRA_KEY_FILE} ubuntu@${CASSANDRA_SEED_SERVER_1} 
 ## Execute following command to create schema
 cqlsh `hostname` -f schema.sql
 ```
 
-10. Create truststore.
+12. Create truststore.
 
    ```shell
     cd ${AWS_DEPLOYMENT_HOME}
     mkdir ../keystore ; cd ../keystore
-    chmod +x ../templates/cdc-connector/*.sh
-    ../templates/cdc-connector/keyspaces-sink-setup-truststore.sh 
+    curl https://certs.secureserver.net/repository/sf-class2-root.crt -O
+    openssl x509 -outform der -in sf-class2-root.crt -out temp_file.der
+    keytool -import -alias cassandra -keystore cassandra_truststore.jks -file temp_file.der
+    
     mkdir -p ~/keystore
     cp cassandra_truststore.jks ~/keystore
     

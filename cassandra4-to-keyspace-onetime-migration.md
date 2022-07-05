@@ -18,13 +18,12 @@
     SECRET_STRING=`aws iam create-service-specific-credential \
     --user-name ${USER_NAME} \
     --service-name cassandra.amazonaws.com --query ServiceSpecificCredential`
-    SERVICE_USER_NAME=`echo $SECRET_STRING | jq -r  .ServiceUserName`
-    SERVICE_USER_PASSWORD=`echo $SECRET_STRING | jq -r  .ServicePassword`
+    export SERVICE_USER_NAME=`echo $SECRET_STRING | jq -r  .ServiceUserName`
+    export SERVICE_USER_PASSWORD=`echo $SECRET_STRING | jq -r  .ServicePassword`
    
     mkdir -p ~/environment/cassandra-bulk
-    cd ~/environment/cassandra-bulk
-    
-    envsubst < ${SOURCE_CODE_ROOT}/cassandra-templates/keyspaces-connector.conf > keyspaces-connector.conf 
+       
+    envsubst < ${SOURCE_CODE_ROOT}/cassandra-templates/keyspaces-connector.conf > ~/environment/cassandra-bulk/keyspaces-connector.conf 
     ```
    4. Create secret in AWS Secret Manager.
     ```shell
@@ -43,16 +42,14 @@ export PATH=$PATH:./dsbulk-1.8.0/bin
 ```
 5. Execute following command to create CSV file for the table you are migrating.
    ```
-   export CONTACT_SERVER=<CASSANDRA-NODE-PRIVATE-IP>
-   export KEYSPACE=<keyspace-name>
-   export TABLE_NAME=<table-name>
-   export S3_BUCKET_NAME=<>
+   . ${SOURCE_CODE_ROOT}/setup-environment.sh
+   CASSANDRA_SEED_SERVER_1=`echo ${CASSANDRA_SEED_SERVERS} | cut -f1 -d","`
    ```
    ```
    mkdir -p ~/environment/cassandra-bulk
    cd ~/environment/cassandra-bulk
    envsubst < ${SOURCE_CODE_ROOT}/cassandra-templates/cassandra-bulk-load-template.conf > cassandra-bulk-load.conf 
-   dsbulk unload -k ${KEYSPACE} -t ${TABLE_NAME} -f ./cassandra-bulk-load.conf > keyspaces_sample_table.csv
+   dsbulk unload -k ${SOURCE_KEYSPACE} -t ${SOURCE_TABLE_NAME} -f ./cassandra-bulk-load.conf > keyspaces_sample_table.csv
    ```
 5. Follow steps in [Data Preparation](https://docs.aws.amazon.com/keyspaces/latest/devguide/dsbulk-upload-prepare-data.html) to prepare and analyze the data. 
    ```
@@ -64,7 +61,7 @@ export PATH=$PATH:./dsbulk-1.8.0/bin
 6. Set throughput for Keyspaces table. Refer [Setting Keyspaces throughput](https://docs.aws.amazon.com/keyspaces/latest/devguide/dsbulk-upload-capacity.html)
 7. Execute following commands to load data to Keyspaces.
 ```
-cp ~/keystore/cassandra_truststore.jks .
+cp ${AWS_DEPLOYMENT_HOME}/../keystore/cassandra_truststore.jks .
 dsbulk load -f ./keyspaces-connector.conf  --connector.csv.url keyspace.table.csv -header true --batch.mode DISABLED --executor.maxPerSecond 5 --driver.basic.request.timeout "5 minutes" --driver.advanced.retry-policy.max-retries 10 -k ${TARGET_KEYSPACE} -t ${TARGET_TABLE}
 ```
 

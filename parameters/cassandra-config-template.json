@@ -3,14 +3,14 @@
   "cassandra_port": "9042",
   "source_keyspace": "${SOURCE_KEYSPACE}",
   "source_table_name": "${SOURCE_TABLE_NAME}",
-  "target_keyspace": "tutorialkeyspace",
-  "target_table_name": "customers",
+  "target_keyspace": "${TARGET_KEYSPACE}",
+  "target_table_name": "${TARGET_TABLE}",
   "cassandra_user": "cassandra",
   "cassandra_password": "cassandra",
   "pulsar_home":"/opt/pulsar",
   "region":"us-east-1",
   "truststore_password":"password",
-  "keyspace_secret_name":"keyspace-secret",
+  "keyspace_secret_name":"${KEYSPACE_SECRET_NAME}",
   "keyspaces_sink_nar_file":"pulsar-io-cassandra-sink-1.0.0-SNAPSHOT.nar",
   "starting_position":"Earliest"
 }
