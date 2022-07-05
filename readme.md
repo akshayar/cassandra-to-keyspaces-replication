@@ -11,22 +11,30 @@ In this document we narrate end to end process to do live migration of Cassandra
 * Validate correctness of data in Keyspace and ensure that changes in Cassandra are being replicated.
 * Deploy new version of application to start reading/writing from/to Keyspaces database.  
 
+## Architecture
+![Cassandra CDC Architecture](images/Cassandra-DataStaxCDC-Keyspaces.drawio.png)
+
+## Deployment Architecture
+![Deployment Architecture](images/Keysapces-Deployment.drawio.png)
+
 ## Deployment pre-requisite
 1. **Cassandra Deployment** - If you don't have Cassandra deployment and want to do POC on this approach , use the instructions below to deploy Apache Cassandra 4 and enable CDC.
     * [Deploy Apache Cassandra](cassandra4-deployment.md)
 2. Create a Cloud9 instance in the public subnet of the VPC which hosts Cassandra cluster. Upload SSH keys to Cloud9 and change permission to 400. 
-3. 4. Validate Cassandra deployment by connecting to a node of the cluster and executing `nodetool status`
+3. Validate Cassandra deployment by connecting to a node of the cluster and executing `nodetool status`
 
 ```
    export CASSANDRA_KEY_FILE=<path-key-file>
    ssh -i ${CASSANDRA_KEY_FILE} ubuntu@<CASSANDRA_NODE_PRIVATE_IP> "nodetool status" 
-```   
+``` 
+![Cassandra Validation](images/cassandra-validation.png)
 4. Create an IAM role for EC2 and add arn:aws:iam::aws:policy/AmazonEC2FullAccess, arn:aws:iam::aws:policy/SecretsManagerReadWrite , arn:aws:iam::aws:policy/IAMFullAccess and arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore roles. Assign the role to EC2 instance of Cloud9. Go to Settings -> AWS Settings and disable "AWS managed temporary credentials".  Validate the role by executing following commands - 
 ```
 aws configure
 aws sts get-caller-identity
 
 ```
+![Cloud9 IAM](images/cloud9.png)
 5. Install ansible, jq, Java 8 and Maven 3.1+.
 ```
 sudo yum install jq ; pip install ansible
@@ -47,13 +55,13 @@ sudo yum install -y apache-maven
 
 6. Clone GitHub repository and set environment variables.
 ```shell
-git clone https://github.com/akshayar/cassandra-samples.git
-cd  cassandra-samples 
+git clone https://github.com/akshayar/cassandra-to-keyspaces-replication.git
+cd  cassandra-to-keyspaces-replication 
 export SOURCE_CODE_ROOT=`pwd`
 ## For multi node pulsar cluster go to pulsar-cluster/terraform-ansible-mnode/aws 
-cd cassandra-cdc/datastax-cdc-pulsar/cassandra-to-keyspaces-replication/terraform-ansible-mnode/aws
+cd terraform-ansible-mnode/aws
 ## For single node/standalone pulsar go to 
-## cd cassandra-cdc/datastax-cdc-pulsar/cassandra-to-keyspaces-replication/terraform-ansible-standalone/aws
+## cd terraform-ansible-standalone/aws
 
 export AWS_DEPLOYMENT_HOME=`pwd`
 ```
@@ -81,7 +89,7 @@ chmod 400 ${CASSANDRA_KEY_FILE}
 export CASSANDRA_CONFIG_FILE_PATH="/usr/share/oss/conf/cassandra.yaml"
 ansible-playbook   --user='ubuntu'   --inventory=${CASSANDRA_INI_FILE} --extra-vars='{"ansible_ssh_private_key_file":"'${CASSANDRA_KEY_FILE}'", "cassandra_config_file_path":"'${CASSANDRA_CONFIG_FILE_PATH}'"}'  ../cassandra-cluster-enable-cdc.yaml
 ```
-9. Execute following command to create required schema from [schema.sql](../schema.sql). 
+9. Execute following command to create required schema from [schema.sql](./terraform-ansible-standalone/cassandra-templates/schema.sql). 
 ```
 ssh -i ${CASSANDRA_KEY_FILE} ubuntu@<seed-address> 
 ## Execute following command to create schema
