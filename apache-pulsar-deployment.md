@@ -23,8 +23,7 @@ SECURITY_GROUP_ID=`aws ec2 describe-instance-attribute --instance-id $INSTANCE_I
 VPC_ID=`aws ec2 describe-instances   --instance-ids ${INSTANCE_ID} --query Reservations[0].Instances[0].VpcId --output text`
 aws ec2 describe-instances   --instance-ids ${INSTANCE_ID} --query Reservations[0].Instances[0].[PublicDnsName,PublicIpAddress,PrivateDnsName,PrivateIpAddress,SubnetId,VpcId] --output text
 aws ec2 describe-vpcs  --vpc-ids ${VPC_ID} --query Vpcs[0].CidrBlock --output text
-aws ec2 describe-subnets --filters "Name=vpc-id,Values=${VPC_ID}" --query Subnets[].[VpcId,AvailabilityZone,CidrBlock,SubnetId,AvailableIpAddressCount] --output text
-
+aws ec2 describe-subnets --filters "Name=vpc-id,Values=${VPC_ID}" --query Subnets[].[VpcId,AvailabilityZone,CidrBlock,SubnetId,AvailableIpAddressCount,Tags[].Value] --output text 
 ```
 
 5. Create Pulsar nodes in the private subnet of the VPC of Cassandra cluster. Edit terraform.tfvars file and update region,VpcID, availability_zone , subnet_id and base_cidr_block.
