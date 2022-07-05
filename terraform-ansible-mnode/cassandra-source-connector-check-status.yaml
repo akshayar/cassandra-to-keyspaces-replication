@@ -24,8 +24,8 @@
     - set_fact:
         server: "{{ cassandra_server }}"
         port: "{{ cassandra_port }}"
-        keyspace: "{{ keyspace }}"
-        table_name: "{{ table_name }}"
+        keyspace: "{{ source_keyspace }}"
+        table_name: "{{ source_table_name }}"
         user: "{{ cassandra_user }}"
         password: "{{ cassandra_password }}"
     - name: Deploy truststore

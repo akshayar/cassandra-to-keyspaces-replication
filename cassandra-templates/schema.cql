@@ -1,14 +1,27 @@
-CREATE KEYSPACE pocdb1
+CREATE KEYSPACE {{ source_keyspace }}
 WITH replication = {'class': 'SimpleStrategy', 'replication_factor' : 3}
 AND durable_writes = true;
 
-USE pocdb1 ;
+USE {{ source_keyspace }} ;
 
 CREATE TABLE products(
   id bigint PRIMARY KEY,
   name text,
   description text,
   weight float
+) WITH cdc=true;
+
+CREATE TABLE products_on_hand (
+  product_id bigint PRIMARY KEY,
+  quantity bigint,
+) WITH cdc=true;
+
+CREATE TABLE customers (
+  id bigint PRIMARY KEY,
+  first_name varchar,
+  last_name varchar,
+  email varchar,
+  insertdate text,
 ) WITH cdc=true;
 
 INSERT INTO products(id,name,description,weight)
@@ -30,10 +43,6 @@ INSERT INTO products(id,name,description,weight)
 INSERT INTO products(id,name,description,weight)
   VALUES (108,'spare tire','24 inch spare tire',22.2);
 
-CREATE TABLE products_on_hand (
-  product_id bigint PRIMARY KEY,
-  quantity bigint,
-) WITH cdc=true;
 
 INSERT INTO products_on_hand(product_id, quantity) VALUES (101,3);
 INSERT INTO products_on_hand(product_id, quantity) VALUES (102,8);
@@ -45,12 +54,6 @@ INSERT INTO products_on_hand(product_id, quantity) VALUES (107,44);
 INSERT INTO products_on_hand(product_id, quantity) VALUES (108,2);
 INSERT INTO products_on_hand(product_id, quantity) VALUES (109,5);
 
-CREATE TABLE customers (
-  id bigint PRIMARY KEY,
-  first_name varchar,
-  last_name varchar,
-  email varchar,
-) WITH cdc=true;
 
 INSERT INTO customers(id,first_name,last_name,email)
   VALUES (1,'Sally','Thomas','sally.thomas@acme.com');

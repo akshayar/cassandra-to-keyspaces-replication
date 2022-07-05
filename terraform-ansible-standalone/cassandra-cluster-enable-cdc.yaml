@@ -54,7 +54,7 @@
   tasks:
     - name: Cassandra Copy schema.sql
       template:
-        src: "../cassandra-templates/schema.sql"
+        src: "../cassandra-templates/schema.cql"
         dest: "/home/ubuntu/schema.sql"
 
 - name: Restart Cassandra
