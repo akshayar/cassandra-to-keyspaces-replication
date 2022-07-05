@@ -28,6 +28,7 @@ In this document we narrate end to end process to do live migration of Cassandra
    ssh -i ${CASSANDRA_KEY_FILE} ubuntu@<CASSANDRA_NODE_PRIVATE_IP> "nodetool status" 
 ``` 
 ![Cassandra Validation](images/cassandra-validation.png)
+
 4. Create an IAM role for EC2 and add arn:aws:iam::aws:policy/AmazonEC2FullAccess, arn:aws:iam::aws:policy/SecretsManagerReadWrite , arn:aws:iam::aws:policy/IAMFullAccess and arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore roles. Assign the role to EC2 instance of Cloud9. Go to Settings -> AWS Settings and disable "AWS managed temporary credentials".  Validate the role by executing following commands - 
 ```
 aws configure
@@ -35,6 +36,7 @@ aws sts get-caller-identity
 
 ```
 ![Cloud9 IAM](images/cloud9.png)
+
 5. Install ansible, jq, Java 8 and Maven 3.1+.
 ```
 sudo yum install jq ; pip install ansible
