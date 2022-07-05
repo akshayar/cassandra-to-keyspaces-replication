@@ -1,5 +1,5 @@
 {
-  "cassandra_server": "${CASSANDRA_SERVERS}",
+  "cassandra_server": "${CASSANDRA_SEED_SERVERS}",
   "cassandra_port": "9042",
   "source_keyspace": "${SOURCE_KEYSPACE}",
   "source_table_name": "${SOURCE_TABLE_NAME}",

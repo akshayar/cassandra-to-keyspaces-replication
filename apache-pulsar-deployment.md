@@ -34,22 +34,15 @@ terraform init
 terraform apply
 ```
 7. Set environment variables and use those to create the config file which will be used further. 
+
 ```
 PULSAR_SERVICE_VALUE=`cat terraform.tfstate | jq -r .outputs.pulsar_service_url.value` 
 echo $PULSAR_SERVICE_VALUE 
 PULSAR_ADMIN_URL=`cat terraform.tfstate | jq -r .outputs.pulsar_web_url.value` 
 echo $PULSAR_ADMIN_URL
-export REGION="us-east-1"
-export SOURCE_KEYSPACE="pocdb1"
-export SOURCE_TABLE_NAME="customers"
 ```
-```
-export CASSANDRA_SERVERS=<cassandra_servers>
 
-```
-```
-envsubst < ../parameters/cassandra-config-template.json > ../parameters/cassandra-config.json
-```
+
 
 8. Run the ansible playbook to deploy Apache Pulsar on EC2 instances created above.
 ```shell

@@ -69,6 +69,11 @@ cp -r ${SOURCE_CODE_ROOT}/cdc-connector ../templates/
 ## cd terraform-ansible-standalone/aws
 
 export AWS_DEPLOYMENT_HOME=`pwd`
+export REGION="us-east-1"
+export SOURCE_KEYSPACE="pocdb1"
+export SOURCE_TABLE_NAME="customers"
+export CASSANDRA_SEED_SERVERS=<cassandra-seed-servers comma separated>
+envsubst < ../parameters/cassandra-config-template.json > ../parameters/cassandra-config.json
 ```
 
 
@@ -80,27 +85,36 @@ cdc_free_space_check_interval_ms: 250
 cdc_raw_directory: /var/lib/cassandra/cdc_raw
 ```
 8. Run following ansible commands to enable CDC and copy [schema.cql](./cassandra-templates/schema.cql).
-```shell
-cd ${AWS_DEPLOYMENT_HOME}
-export CASSANDRA_INI_FILE=cassandra.ini
-cat << EOF > ${CASSANDRA_INI_FILE}
+
+```
+export CASSANDRA_KEY_FILE=<path-key-file>
+```
+
+```
+cat << EOF > ${AWS_DEPLOYMENT_HOME}/cassandra.ini
 [cassandra]
 <cassandra-private-ip1>
 <cassandra-private-ip2>
 <cassandra-private-ip3>
 EOF
-export CASSANDRA_KEY_FILE=<path-key-file>
+```
+
+```shell
+cd ${AWS_DEPLOYMENT_HOME}
 chmod 400 ${CASSANDRA_KEY_FILE}
 export CASSANDRA_CONFIG_FILE_PATH="/usr/share/oss/conf/cassandra.yaml"
-ansible-playbook   --user='ubuntu'   --inventory=${CASSANDRA_INI_FILE} --extra-vars='{"ansible_ssh_private_key_file":"'${CASSANDRA_KEY_FILE}'", "cassandra_config_file_path":"'${CASSANDRA_CONFIG_FILE_PATH}'"}'  ../cassandra-cluster-enable-cdc.yaml
+ansible-playbook   --user='ubuntu'   --inventory=cassandra.ini --extra-vars='{"ansible_ssh_private_key_file":"'${CASSANDRA_KEY_FILE}'", "cassandra_config_file_path":"'${CASSANDRA_CONFIG_FILE_PATH}'"}'  ../cassandra-cluster-enable-cdc.yaml
 ```
 9. Execute following command to create required schema from [schema.cql](./cassandra-templates/schema.cql). 
+
 ```
 ssh -i ${CASSANDRA_KEY_FILE} ubuntu@<seed-address> 
 ## Execute following command to create schema
 cqlsh `hostname` -f schema.sql
 ```
+
 10. Create truststore.
+
    ```shell
     cd ${AWS_DEPLOYMENT_HOME}
     mkdir ../keystore ; cd ../keystore
