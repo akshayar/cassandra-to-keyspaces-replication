@@ -76,7 +76,7 @@ cdc_total_space_in_mb: 4096
 cdc_free_space_check_interval_ms: 250
 cdc_raw_directory: /var/lib/cassandra/cdc_raw
 ```
-8. Run following ansible commands to enable CDC and copy [schema.sql](../schema.sql).
+8. Run following ansible commands to enable CDC and copy [schema.sql](./terraform-ansible-standalone/cassandra-templates/schema.sql).
 ```shell
 cd ${AWS_DEPLOYMENT_HOME}
 export CASSANDRA_INI_FILE=cassandra.ini
