@@ -73,9 +73,8 @@ export AWS_DEPLOYMENT_HOME=`pwd`
 8. Start a process to insert fake data into the source Cassandra table to simulate a running application.
 
 ```shell
-cd ~/environment/
-git clone https://github.com/akshayar/cassandra-samples.git
-cd cassandra-samples/cassandra-java-samples
+
+cd ${SOURCE_CODE_ROOT}/cassandra-java-samples
 ./build.sh
 ## Delay in MS
 export DELAY=10
@@ -142,9 +141,11 @@ Use these steps to deploy Datastax source connectoer for Apache Pulsar which pus
 Use these steps to do one time migration of Cassandra to Amazon Keyspaces while the live replication to Apache Pulsar is in progress. During the course of this migration changes are being replicated to Apache Pulsar, there is strong probability of those changes to migrate to Amazon Keysapces databse using the one time migration approach as well. You need to ensure that Pulsar sink connector for Amazon Keyspaces database idempotent. 
 * [Cassandra to Keyspaces ontime migration](cassandra4-to-keyspace-onetime-migration.md)
 ## Validate data once migration is complete
-
+Use these steps to compare data between source and target DB. 
+* [Data Validation and Comparison](data-validation.md)
 ## Deploy Pulsar sink connector for Amazon Keyspaces database
 Once the one time migration is complete use these steps to deploy and start Pulsar sink connector for Amazon Keyspaces database which will push the changes buffered in Apache Pulsar cluster to Amazon Keyspaces databse. The sink connector should be idempotent as there is strong probability that some of these changes are already migrated to Amazon Keyspaces through one time migration. 
 * [Deploy and start Pulsar sink connector for Amazon Keyspaces database](keyspace-sink-connector-deployment.md)
-
 ## Validate correctness of data in Amazon Keyspaces database
+Use these steps to compare data between source and target DB.
+* [Data Validation and Comparison](data-validation.md)

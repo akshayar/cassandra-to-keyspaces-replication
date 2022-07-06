@@ -78,7 +78,25 @@ export AWS_DEPLOYMENT_HOME=`pwd`
 ```
 . ${SOURCE_CODE_ROOT}/setup-environment.sh
 ```
-3. Update `${AWS_DEPLOYMENT_HOME}/cassandra.ini` and add all Cassandra servers in the cassandra.ini file. 
+3. Start a process to insert fake data into the source Cassandra table to simulate a running application.
+
+```shell
+
+cd ${SOURCE_CODE_ROOT}/cassandra-java-samples
+./build.sh
+## Delay in MS
+export DELAY=10
+## Count of data
+export COUNT=100000
+cat << EOF > cassandra-source.conf
+datastax-java-driver {
+  basic.contact-points = [ "${CASSANDRA_SEED_SERVER_1}"]
+}
+EOF
+./fake-crud.sh cassandra-source.conf ${SOURCE_KEYSPACE}
+
+```
+4. Update `${AWS_DEPLOYMENT_HOME}/cassandra.ini` and add all Cassandra servers in the cassandra.ini file. 
 ### Enable Cassandra CDC , modify to enable connect with private IP and create source schema for POC
 1. Enable CDC by modifying <CASSANDRA_ROOT>/conf/cassandra.yaml (/usr/share/oss/conf/cassandra.yaml for deployment in Step 1) and adding/updating following properties.
 ```shell
@@ -289,7 +307,23 @@ dsbulk load -f ./keyspaces-connector.conf  --connector.csv.url keyspace.table.cs
 ```
 
 ## Validate data once migration is complete
-
+1. To do the data validation , the script will compare data from source and target table for a list of ids which are provided in a file.
+2. The data insert script creates a file with name id.txt which will be used to do this comparison.
+3. On the cloud9 follow these steps to compare data.
+```shell
+cd ${SOURCE_CODE_ROOT}/cassandra-java-samples
+```
+4. Create the Keyspace configuration file
+```shell
+envsubst < ${SOURCE_CODE_ROOT}/cassandra-templates/keyspaces-connector.conf > keyspaces-connector.conf 
+```
+5. Compare records for created id.txt file which is generated from the insert script.
+```shell
+./comare-records.sh -sconf cassandra-source.conf -skey ${SOURCE_KEYSPACE} -stab ${SOURCE_TABLE_NAME} \
+-tconf keyspaces-connector.conf -tkey ${TARGET_KEYSPACE} -ttab ${TARGET_TABLE} \
+-idfile id.txt
+```
+6. Refer to the results in compare-result.log file.
 ## Deploy Pulsar sink connector for Amazon Keyspaces database
 1. Once the one time migration is complete use these steps to deploy and start Pulsar sink connector for Amazon Keyspaces database which will push the changes buffered in Apache Pulsar cluster to Amazon Keyspaces databse. The sink connector should be idempotent as there is strong probability that some of these changes are already migrated to Amazon Keyspaces through one time migration. 
 2. Deploy Pulsar sink connector for Keyspaces database. The connector will start pushing changes captured on data-<keyspace-name>.<table-name> topic to Keyspaces database.
@@ -321,3 +355,4 @@ cp target/pulsar-io-cassandra-sink-*.nar ${AWS_DEPLOYMENT_HOME}/../binaries
 
 
 ## Validate correctness of data in Amazon Keyspaces database
+Refer "Validate data once migration is complete" steps. 
