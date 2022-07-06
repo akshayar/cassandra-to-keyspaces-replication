@@ -23,33 +23,31 @@ In this document we narrate end to end process to do live migration of Cassandra
 2. Create a Cloud9 instance in the public subnet of the VPC which hosts Cassandra cluster. Upload SSH keys to Cloud9 and change permission to 400. 
 3. Validate Cassandra deployment by connecting to a node of the cluster and executing `nodetool status`
 
-```
+```shell
    export CASSANDRA_KEY_FILE=<path-key-file>
    ssh -i ${CASSANDRA_KEY_FILE} ubuntu@<CASSANDRA_NODE_PRIVATE_IP> "nodetool status" 
 ``` 
 ![Cassandra Validation](images/cassandra-validation.png)
 
 4. Create an IAM role for EC2 and add arn:aws:iam::aws:policy/AmazonEC2FullAccess, arn:aws:iam::aws:policy/SecretsManagerReadWrite , arn:aws:iam::aws:policy/IAMFullAccess and arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore roles. Assign the role to EC2 instance of Cloud9. Go to Settings -> AWS Settings and disable "AWS managed temporary credentials".  Validate the role by executing following commands - 
-```
-
+```shell
 aws sts get-caller-identity
-
 ```
 ![Cloud9 IAM](images/cloud9.png)
 
 5. Install ansible, jq, Java 8 and Maven 3.1+.
-```
+```shell
 sudo yum install jq ; pip install ansible
 terraform version
 
 ```
-```
+```shell
 sudo yum -y update
 sudo yum -y install java-1.8.0-openjdk-devel
 sudo update-alternatives --config java
 sudo update-alternatives --config javac
 ```
-```
+```shell
 sudo wget http://repos.fedorapeople.org/repos/dchen/apache-maven/epel-apache-maven.repo -O /etc/yum.repos.d/epel-apache-maven.repo
 sudo sed -i s/\$releasever/6/g /etc/yum.repos.d/epel-apache-maven.repo
 sudo yum install -y apache-maven
@@ -69,36 +67,55 @@ export AWS_DEPLOYMENT_HOME=`pwd`
 
 ```
 7. Update `${SOURCE_CODE_ROOT}/setup-environment.sh` and `${SOURCE_CODE_ROOT}/parameters/cassandra-config-template.json`. Run below command to set environment variables. 
-```
+```shell
 . ${SOURCE_CODE_ROOT}/setup-environment.sh
 ```
-8. Update `${AWS_DEPLOYMENT_HOME}/cassandra.ini` and add all Cassandra servers in the cassandra.ini file. 
+8. Start a process to insert fake data into the source Cassandra table to simulate a running application.
 
-9. Enable CDC by modifying <CASSANDRA_ROOT>/conf/cassandra.yaml (/usr/share/oss/conf/cassandra.yaml for deployment in Step 1) and adding/updating following properties.
+```shell
+cd ~/environment/
+git clone https://github.com/akshayar/cassandra-samples.git
+cd cassandra-samples/cassandra-java-samples
+./build.sh
+## Delay in MS
+export DELAY=10
+## Count of data
+export COUNT=100000
+cat << EOF > cassandra-source.conf
+datastax-java-driver {
+  basic.contact-points = [ "${CASSANDRA_SEED_SERVER_1}"]
+}
+EOF
+./fake-crud.sh cassandra-source.conf ${SOURCE_KEYSPACE}
+
+```
+9. Update `${AWS_DEPLOYMENT_HOME}/cassandra.ini` and add all Cassandra servers in the cassandra.ini file. 
+
+10. Enable CDC by modifying <CASSANDRA_ROOT>/conf/cassandra.yaml (/usr/share/oss/conf/cassandra.yaml for deployment in Step 1) and adding/updating following properties.
 ```shell
 cdc_enabled: false
 cdc_total_space_in_mb: 4096
 cdc_free_space_check_interval_ms: 250
 cdc_raw_directory: /var/lib/cassandra/cdc_raw
 ```
-10. Run following ansible commands to enable CDC and copy [schema.cql](./cassandra-templates/schema.cql).
+11. Run following ansible commands to enable CDC and copy [schema.cql](./cassandra-templates/schema.cql).
 
 ```shell
 cd ${AWS_DEPLOYMENT_HOME}
 ansible-playbook   --user='ubuntu'   --inventory=cassandra.ini --extra-vars='{"ansible_ssh_private_key_file":"'${CASSANDRA_KEY_FILE}'", "cassandra_config_file_path":"'${CASSANDRA_CONFIG_FILE_PATH}'"}'  ../cassandra-cluster-enable-cdc.yaml
 ```
-11. Execute following command to create required keyspace and table from [schema.cql](./cassandra-templates/schema.cql). 
+12. Execute following command to create required keyspace and table from [schema.cql](./cassandra-templates/schema.cql). 
 
-```
+```shell
 CASSANDRA_SEED_SERVER_1=`echo ${CASSANDRA_SEED_SERVERS} | cut -f1 -d","`
 ssh -i ${CASSANDRA_KEY_FILE} ubuntu@${CASSANDRA_SEED_SERVER_1} 
 ## Execute following command to create schema
 cqlsh `hostname` -f schema.sql
 ```
 
-12. Create truststore.
+13. Create truststore.
 
-   ```shell
+```shell
     cd ${AWS_DEPLOYMENT_HOME}
     mkdir ../keystore ; cd ../keystore
     curl https://certs.secureserver.net/repository/sf-class2-root.crt -O
@@ -108,7 +125,7 @@ cqlsh `hostname` -f schema.sql
     mkdir -p ~/keystore
     cp cassandra_truststore.jks ~/keystore
     
-   ```   
+```   
 ## Deploy Apache Pulsar cluster
 Use these steps to deploy Apache Pulsar cluster on EC2 nodes. The instructions below refer code and instructions from [Deploying a Pulsar cluster on AWS using Terraform and Ansible]
 (https://pulsar.apache.org/docs/deploy-aws/). We customize the code and instructions for the scope of this document. 
