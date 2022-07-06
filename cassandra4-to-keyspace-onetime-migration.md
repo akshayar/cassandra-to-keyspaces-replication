@@ -8,6 +8,9 @@
       aws keyspaces create-keyspace --keyspace-name <keyspace-name>
     ```
    2. Create tables in the keyspace from [keyspaces-schema.cql](./cassandra-templates/keyspaces-schema.cql)
+   ```shell
+   envsubst < ${SOURCE_CODE_ROOT}/cassandra-templates/keyspaces-schema.cql
+   ```
    3. Generate service specific credentials. Refer [Keyspaces Credential Generation](https://docs.aws.amazon.com/keyspaces/latest/devguide/programmatic.credentials.ssc.html) .
     ```shell
     USER_NAME=keyspace-user
@@ -36,14 +39,15 @@
 
 4. From Cloud9 execute following commands to install dsbulk. 
 ```
+cd ~/environment
 curl -OL https://downloads.datastax.com/dsbulk/dsbulk-1.8.0.tar.gz
 tar -zxvf dsbulk-1.8.0.tar.gz
-export PATH=$PATH:./dsbulk-1.8.0/bin
+export PATH=$PATH:`pwd`/dsbulk-1.8.0/bin
 ```
 5. Execute following command to create CSV file for the table you are migrating.
    ```
    . ${SOURCE_CODE_ROOT}/setup-environment.sh
-   CASSANDRA_SEED_SERVER_1=`echo ${CASSANDRA_SEED_SERVERS} | cut -f1 -d","`
+   export CASSANDRA_SEED_SERVER_1=`echo ${CASSANDRA_SEED_SERVERS} | cut -f1 -d","`
    ```
    ```
    mkdir -p ~/environment/cassandra-bulk

@@ -3,14 +3,16 @@
 2. The data insert script creates a file with name id.txt which will be used to do this comparison. 
 3. On the cloud9 follow these steps to compare data. 
 ```shell
-cd ${SOURCE_CODE_ROOT}/cassandra-java-samples
+cd ~/environment/cassandra-to-keyspaces-replication/cassandra-java-samples
 ```
-4. Create the Keyspace configuration file
+4. Copy the Keyspace configuration file and keystore from bulk load directory
 ```shell
-envsubst < ${SOURCE_CODE_ROOT}/cassandra-templates/keyspaces-connector.conf > keyspaces-connector.conf 
+cp ~/environment/cassandra-bulk/keyspaces-connector.conf .
+cp ~/environment/cassandra-bulk/cassandra_truststore.jks .
 ```
 5. Compare records for created id.txt file which is generated from the insert script. 
 ```shell
+. ../setup-environment.sh
 ./comare-records.sh -sconf cassandra-source.conf -skey ${SOURCE_KEYSPACE} -stab ${SOURCE_TABLE_NAME} \
 -tconf keyspaces-connector.conf -tkey ${TARGET_KEYSPACE} -ttab ${TARGET_TABLE} \
 -idfile id.txt

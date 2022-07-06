@@ -1,8 +1,8 @@
-CREATE KEYSPACE {{ source_keyspace }}
+CREATE KEYSPACE ${SOURCE_KEYSPACE}
 WITH replication = {'class': 'SimpleStrategy', 'replication_factor' : 3}
 AND durable_writes = true;
 
-USE {{ source_keyspace }} ;
+USE ${SOURCE_KEYSPACE} ;
 
 CREATE TABLE products(
   id bigint PRIMARY KEY,

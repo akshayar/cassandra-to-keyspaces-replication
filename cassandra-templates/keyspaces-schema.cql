@@ -1,16 +1,16 @@
-CREATE TABLE {{ target_keyspace }}.products(
+CREATE TABLE ${TARGET_KEYSPACE}.products(
   id bigint PRIMARY KEY,
   name text,
   description text,
   weight float
 ) WITH cdc=true;
 
-CREATE TABLE {{ target_keyspace }}..products_on_hand (
+CREATE TABLE ${TARGET_KEYSPACE}.products_on_hand (
   product_id bigint PRIMARY KEY,
   quantity bigint,
 ) WITH cdc=true;
 
-CREATE TABLE {{ target_keyspace }}..customers (
+CREATE TABLE ${TARGET_KEYSPACE}.customers (
   id bigint PRIMARY KEY,
   first_name varchar,
   last_name varchar,

@@ -70,11 +70,12 @@ export AWS_DEPLOYMENT_HOME=`pwd`
 ```shell
 . ${SOURCE_CODE_ROOT}/setup-environment.sh
 ```
-8. Start a process to insert fake data into the source Cassandra table to simulate a running application.
+8. In a separate terminal , start a process to insert fake data into the source Cassandra table to simulate a running application.
 
 ```shell
 cd ~/environment/cassandra-to-keyspaces-replication/
 . setup-environment.sh
+CASSANDRA_SEED_SERVER_1=`echo ${CASSANDRA_SEED_SERVERS} | cut -f1 -d","`
 cd cassandra-java-samples
 ./build.sh
 ## Delay in MS
@@ -83,7 +84,10 @@ export DELAY=10
 export COUNT=100000
 cat << EOF > cassandra-source.conf
 datastax-java-driver {
-  basic.contact-points = [ "${CASSANDRA_SEED_SERVER_1}"]
+  basic.contact-points = [ "${CASSANDRA_SEED_SERVER_1}:9042"]
+  basic.load-balancing-policy {
+    local-datacenter = "OSS-dc0"
+  }
 }
 EOF
 ./fake-crud.sh cassandra-source.conf ${SOURCE_KEYSPACE}
@@ -102,15 +106,18 @@ cdc_raw_directory: /var/lib/cassandra/cdc_raw
 
 ```shell
 cd ${AWS_DEPLOYMENT_HOME}
-ansible-playbook   --user='ubuntu'   --inventory=cassandra.ini --extra-vars='{"ansible_ssh_private_key_file":"'${CASSANDRA_KEY_FILE}'", "cassandra_config_file_path":"'${CASSANDRA_CONFIG_FILE_PATH}'"}'  ../cassandra-cluster-enable-cdc.yaml
+ansible-playbook   --user='ubuntu'   --inventory=cassandra.ini \
+--extra-vars="@../parameters/cassandra-config.json" \
+--extra-vars='{"ansible_ssh_private_key_file":"'${CASSANDRA_KEY_FILE}'", "cassandra_config_file_path":"'${CASSANDRA_CONFIG_FILE_PATH}'"}' \
+ ../cassandra-cluster-enable-cdc.yaml
 ```
 12. Execute following command to create required keyspace and table from [schema.cql](./cassandra-templates/schema.cql). 
 
 ```shell
 CASSANDRA_SEED_SERVER_1=`echo ${CASSANDRA_SEED_SERVERS} | cut -f1 -d","`
-ssh -i ${CASSANDRA_KEY_FILE} ubuntu@${CASSANDRA_SEED_SERVER_1} 
+ssh -i ${CASSANDRA_KEY_FILE} ubuntu@${CASSANDRA_SEED_SERVER_1} 'cqlsh `hostname` -f schema.sql'
 ## Execute following command to create schema
-cqlsh `hostname` -f schema.sql
+
 ```
 
 13. Create truststore.

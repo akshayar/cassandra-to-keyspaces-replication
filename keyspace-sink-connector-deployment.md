@@ -3,7 +3,7 @@
 2. Build ţhe package and copy nar file to ${AWS_DEPLOYMENT_HOME}/binaries.
    
 ```shell
-cd ${SOURCE_CODE_ROOT}/cassandra-cdc/datastax-cdc-pulsar/pulsar-io-cassandra-sink
+cd ${SOURCE_CODE_ROOT}/pulsar-io-cassandra-sink
 ./build.sh 
 mkdir -p ${AWS_DEPLOYMENT_HOME}/../binaries
 cp target/pulsar-io-cassandra-sink-*.nar ${AWS_DEPLOYMENT_HOME}/../binaries
