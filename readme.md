@@ -73,8 +73,9 @@ export AWS_DEPLOYMENT_HOME=`pwd`
 8. Start a process to insert fake data into the source Cassandra table to simulate a running application.
 
 ```shell
-
-cd ${SOURCE_CODE_ROOT}/cassandra-java-samples
+cd ~/environment/cassandra-to-keyspaces-replication/
+. setup-environment.sh
+cd cassandra-java-samples
 ./build.sh
 ## Delay in MS
 export DELAY=10
