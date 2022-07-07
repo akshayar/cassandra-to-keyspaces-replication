@@ -9,4 +9,4 @@ export KEYSPACE_SECRET_NAME="keyspace-secret"
 export CASSANDRA_SEED_SERVERS=<cassandra-seed-servers comma separated>
 export CASSANDRA_KEY_FILE=<path-key-file>
 chmod 400 ${CASSANDRA_KEY_FILE}
-envsubst < ../parameters/cassandra-config-template.json > ../parameters/cassandra-config.json
+envsubst < ${AWS_DEPLOYMENT_HOME}/../parameters/cassandra-config-template.json > ${AWS_DEPLOYMENT_HOME}/../parameters/cassandra-config.json
