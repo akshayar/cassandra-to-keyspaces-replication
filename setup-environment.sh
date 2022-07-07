@@ -9,4 +9,12 @@ export KEYSPACE_SECRET_NAME="keyspace-secret"
 export CASSANDRA_SEED_SERVERS=<cassandra-seed-servers comma separated>
 export CASSANDRA_KEY_FILE=<path-key-file>
 chmod 400 ${CASSANDRA_KEY_FILE}
-envsubst < ${AWS_DEPLOYMENT_HOME}/../parameters/cassandra-config-template.json > ${AWS_DEPLOYMENT_HOME}/../parameters/cassandra-config.json
+SUBSTITUTE_ENV_IN_CONFIG=$1
+if [ -z "$SUBSTITUTE_ENV_IN_CONFIG" ]
+then
+  echo "No environment substitution"
+else
+  echo "Doing environment substitution in ${AWS_DEPLOYMENT_HOME}/../parameters/cassandra-config.json"
+  envsubst < ${AWS_DEPLOYMENT_HOME}/../parameters/cassandra-config-template.json > ${AWS_DEPLOYMENT_HOME}/../parameters/cassandra-config.json
+
+fi

@@ -68,7 +68,7 @@ export AWS_DEPLOYMENT_HOME=`pwd`
 ```
 7. Update `${SOURCE_CODE_ROOT}/setup-environment.sh` and `${SOURCE_CODE_ROOT}/parameters/cassandra-config-template.json`. Run below command to set environment variables. 
 ```shell
-. ${SOURCE_CODE_ROOT}/setup-environment.sh
+. ${SOURCE_CODE_ROOT}/setup-environment.sh Y
 ```
 8. In a separate terminal , start a process to insert fake data into the source Cassandra table to simulate a running application.
 
