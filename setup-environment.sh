@@ -16,5 +16,7 @@ then
 else
   echo "Doing environment substitution in ${AWS_DEPLOYMENT_HOME}/../parameters/cassandra-config.json"
   envsubst < ${AWS_DEPLOYMENT_HOME}/../parameters/cassandra-config-template.json > ${AWS_DEPLOYMENT_HOME}/../parameters/cassandra-config.json
+  envsubst < ${AWS_DEPLOYMENT_HOME}/../cassandra-templates/schema.cql > ${AWS_DEPLOYMENT_HOME}/../cassandra-templates/schema_sub.cql
+  cp ${AWS_DEPLOYMENT_HOME}/../cassandra-templates/schema_sub.cql ${AWS_DEPLOYMENT_HOME}/../cassandra-templates/schema.cql
 
 fi

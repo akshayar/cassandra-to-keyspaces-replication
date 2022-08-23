@@ -68,8 +68,11 @@ resource "aws_iam_role" "role" {
 EOF
 }
 
+resource "random_string" "id_name" {
+  length = 4
+}
 resource "aws_iam_instance_profile" "instance_profile" {
-  name = "pulsar-instance-profile"
+  name = "pulsar-instance-profile-${random_string.id_name.result}"
   role = aws_iam_role.role.name
 }
 
