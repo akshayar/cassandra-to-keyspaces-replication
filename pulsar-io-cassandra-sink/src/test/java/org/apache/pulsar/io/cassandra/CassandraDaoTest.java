@@ -56,7 +56,7 @@ public class CassandraDaoTest {
 		Record<GenericObject> rec=Mockito.mock(Record.class);
 		Mockito.doNothing().when(rec).ack();
 		CassandraSinkConfig config = new CassandraSinkConfig();
-		config.setKeyspace("tutorialkeyspace");
+		config.setKeyspace("targetkeyspace");
 		config.setTableName("customers");
 		config.setRoots("cassandra.us-east-1.amazonaws.com:9142");
 		config.setRegion("us-east-1");
@@ -73,7 +73,7 @@ public class CassandraDaoTest {
 		Mockito.doNothing().when(rec).ack();
 		CassandraSinkConfig config = new CassandraSinkConfig();
 		config.setConfigFilePath("config/cassandra-loader/application-keyspace-iamuser.conf");
-		config.setKeyspace("tutorialkeyspace");
+		config.setKeyspace("targetkeyspace");
 		config.setTableName("customers");
 		config.setKeyspacedb(true);
 		CassandraDao dao = new CassandraDao(config);
@@ -88,7 +88,7 @@ public class CassandraDaoTest {
 		Mockito.doNothing().when(rec).ack();
 		CassandraSinkConfig config = new CassandraSinkConfig();
 		config.setConfigFilePath("config/cassandra-loader/application-keyspace-secret-manager.conf");
-		config.setKeyspace("tutorialkeyspace");
+		config.setKeyspace("targetkeyspace");
 		config.setTableName("customers");
 		config.setKeyspacedb(true);
 		CassandraDao dao = new CassandraDao(config);

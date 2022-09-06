@@ -23,14 +23,16 @@ public class FakeProductInserter {
     private Map<String, PreparedStatement> map=new HashMap<>();
     private BlockingQueue<Long> prodIdQueue=new LinkedBlockingDeque<>();
     private BlockingQueue<Long> custIdQueue=new LinkedBlockingDeque<>();
-    PrintStream printId=null;
+    PrintStream printIdCustomer =null;
+    PrintStream printIdProducts =null;
     private static final org.slf4j.Logger log= LoggerFactory.getLogger(FakeProductInserter.class);
 
 
 
     public FakeProductInserter(String _keyspace) throws FileNotFoundException {
         this.keyspace=_keyspace;
-        printId=new PrintStream(new FileOutputStream("id.txt"));
+        printIdCustomer =new PrintStream(new FileOutputStream("id.txt"));
+        printIdProducts =new PrintStream(new FileOutputStream("id-products.txt"));
     }
 
     private static final String PRODUCT_INSERT_CQL="INSERT INTO #KEYSPACE#.#TABLE#(id,name,description,weight)" +
@@ -58,7 +60,7 @@ public class FakeProductInserter {
             session.execute(preparedStatement2.bind(id,faker.number().numberBetween(1l,10000l)));
         }
         System.out.println("Inserting Product id:"+id);
-        printId.println(id);
+        printIdProducts.println(id);
 
     }
     private static final String PRODUCT_UPDATE_CQL="UPDATE  #KEYSPACE#.#TABLE# SET description =?" +
@@ -105,7 +107,7 @@ public class FakeProductInserter {
             session.execute(preparedStatement.bind(id,name.firstName(),name.lastName(),email,date));
         }
         System.out.println("Inserting Customer id:"+id);
-        printId.println(id);
+        printIdCustomer.println(id);
 
 
     }
@@ -155,12 +157,10 @@ public class FakeProductInserter {
         IntStream.range(1,Integer.valueOf(totalIterations)).parallel().forEach(i->{
             try{
                 if(random.nextBoolean()){
-                    System.out.println("inserting "+i);
                     inserter.insertProduct(session);
 
                     inserter.insertCustomer(session);
                 }else{
-                    System.out.println("updating " +i);
                     inserter.updateProduct(session);
 
                     inserter.updateCustomer(session);

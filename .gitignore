@@ -1,1 +1,7 @@
-/cassandra-java-samples/target/
+target/
+.idea
+.project
+dependency-reduced-pom.xml
+*.iml
+.DS_Store
+

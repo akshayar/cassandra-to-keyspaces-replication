@@ -91,7 +91,7 @@ ls
 ```shell
 cd ${HOME}/pulsar-io-cassandra-sink-connector
 export CONNECTOR_HOME=${HOME}/pulsar-io-cassandra-sink-connector
-export CASSANDRA_KEY_SAPCE=tutorialkeyspace
+export CASSANDRA_KEY_SAPCE=targetkeyspace
 export CASSANDRA_TABLE=customers
 export NAR_FILE_NAME=pulsar-io-cassandra-sink-1.0.0-SNAPSHOT.nar
 cat << EOF > deploy/deploy-setup.sh
