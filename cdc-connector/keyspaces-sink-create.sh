@@ -4,7 +4,7 @@ cd {{ pulsar_home }}/pulsar-io-cassandra-sink-connector/
 export KEYSPACE_NAME=${1}
 export KEYSPACES_TABLE_NAME=${2}
 export PULSAR_DATA_TOPIC_NAME=${3}
-export TOPIC_READ_FROM=${4}
+export KEYSPACES_SINK_TOPIC_READ_FROM=${4}
 
 export SINK_CONNECTOR_NAME=pulsar-keyspaces-sink-${KEYSPACE_NAME}-${KEYSPACES_TABLE_NAME}
 

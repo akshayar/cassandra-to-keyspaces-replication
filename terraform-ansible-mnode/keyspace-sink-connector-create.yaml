@@ -27,10 +27,10 @@
         target_table_name: "{{ target_table_name }}"
         source_keyspace: "{{ source_keyspace }}"
         source_table_name: "{{ source_table_name }}"
-        starting_position: "{{ starting_position }}"
+        keyspaces_sink_topic_read_from: "{{ keyspaces_sink_topic_read_from }}"
     - name: Deploy truststore
       shell: |
         chmod +x {{ pulsar_home }}/pulsar-io-cassandra-sink-connector/*.sh
-        {{ pulsar_home }}/pulsar-io-cassandra-sink-connector/keyspaces-sink-create.sh  {{ target_keyspace }} {{ target_table_name }} persistent://public/default/data-{{ source_keyspace }}.{{ source_table_name }} {{ starting_position }}
+        {{ pulsar_home }}/pulsar-io-cassandra-sink-connector/keyspaces-sink-create.sh  {{ target_keyspace }} {{ target_table_name }} persistent://public/default/data-{{ source_keyspace }}.{{ source_table_name }} {{ keyspaces_sink_topic_read_from }}
       register: ps
     - debug: var=ps.stdout_lines

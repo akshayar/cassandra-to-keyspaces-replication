@@ -5,12 +5,12 @@
   "source_table_name": "${SOURCE_TABLE_NAME}",
   "target_keyspace": "${TARGET_KEYSPACE}",
   "target_table_name": "${TARGET_TABLE}",
-  "cassandra_user": "cassandra",
-  "cassandra_password": "cassandra",
-  "pulsar_home":"/opt/pulsar",
-  "region":"us-east-1",
-  "truststore_password":"password",
-  "keyspace_secret_name":"${KEYSPACE_SECRET_NAME}",
+  "cassandra_user": "${CASSANDRA_USER_ID}",
+  "cassandra_password": "${CASSANDRA_PASSWORD}",
+  "pulsar_home":"${PULSAR_HOME}",
+  "region":"${REGION}",
+  "truststore_password":"${KEYSPACES_TRUSTSTORE_PASSWORD}",
+  "keyspace_secret_name":"${KEYSPACES_SECRET_NAME}",
   "keyspaces_sink_nar_file":"pulsar-io-cassandra-sink-1.0.0-SNAPSHOT.nar",
-  "starting_position":"Earliest"
+  "keyspaces_sink_topic_read_from":"${KEYSPACES_SINK_TOPIC_READ_FROM}"
 }
